@@ -52,12 +52,11 @@ public class NetworkManager {
      * listener is the instance of 'PostResponseListener' interface
      **/
     public void makeGETRequest(final String url, final String username, final String password, final PostResponseListener listener) {
-        String urltoCall = url + "?name=" + username + "&pswd=" + password;
         // callback for starting request
         listener.onRequestStarted();
 
         // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, urltoCall,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
