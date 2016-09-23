@@ -81,7 +81,7 @@ public class NetworkManager {
     }
 
 
-    public void makePOSTRequest(final String url, final String username, final String password, final PostResponseListener listener) {
+    public void makePOSTRequest(final String url, final String email, final String password, final PostResponseListener listener) {
         // callback for starting request
         listener.onRequestStarted();
 
@@ -109,8 +109,8 @@ public class NetworkManager {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("name", username);
-                params.put("pswd", password);
+                params.put("email", email);
+                params.put("password", password);
                 return params;
             }
 
@@ -127,5 +127,52 @@ public class NetworkManager {
         if (requestQueue != null) {
             requestQueue.cancelAll("volleyRequest");
         }
+    }
+
+    public void makePOSTRequest(final String url, final String firstName, final String lastName,
+                                final String email, final String password, final String country,
+                                final String locality, final String phone, final PostResponseListener listener) {
+        // callback for starting request
+        listener.onRequestStarted();
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Send the response back to UI
+                        listener.onPOSTRequestCompleted(response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Network Error", error.toString());
+                        // Send error back to the UI if error happens
+                        if (error instanceof TimeoutError) {
+                            listener.onRequestTimeOutError();
+                        } else {
+                            listener.onPOSTRequestEndedWithError(error);
+                        }
+                    }
+                }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("fname", firstName);
+                params.put("lname", lastName);
+                params.put("email", email);
+                params.put("password", password);
+                params.put("country", country);
+                params.put("locality", locality);
+                params.put("phone", phone);
+                params.put("regtype", "3");
+                return params;
+            }
+
+        };
+        stringRequest.setTag("volleyRequest");
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(60000, 0, 0));
+        requestQueue.add(stringRequest);
     }
 }

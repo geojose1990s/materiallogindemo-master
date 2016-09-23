@@ -2,9 +2,7 @@ package com.sourcey.materiallogindemo;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -44,7 +42,12 @@ public class LoginActivity extends AppCompatActivity implements PostResponseList
 
             @Override
             public void onClick(View v) {
-                login();
+                if (!validate()) {
+                    return;
+                }
+                String email = _emailText.getText().toString();
+                String password = _passwordText.getText().toString();
+                NetworkManager.getInstance().makePOSTRequest("http://avs.aptdeal.in/login.php", email, password, LoginActivity.this);
             }
         });
 
@@ -59,39 +62,6 @@ public class LoginActivity extends AppCompatActivity implements PostResponseList
         });
     }
 
-    public void login() {
-        Log.d(TAG, "Login");
-
-        if (!validate()) {
-            return;
-        }
-
-        _loginButton.setEnabled(false);
-
-        progressDialog = new ProgressDialog(LoginActivity.this,
-                R.style.AppTheme_Dark_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.show();
-
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
-        // TODO: Implement your own authentication logic here.
-        NetworkManager.getInstance().makePOSTRequest("http://avs.aptdeal.in/", email, password, this);
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_SIGNUP) {
-            if (resultCode == RESULT_OK) {
-
-                // TODO: Implement successful signup logic here
-                // By default we just finish the Activity and log them in automatically
-                this.finish();
-            }
-        }
-    }
 
     @Override
     public void onBackPressed() {
@@ -124,12 +94,16 @@ public class LoginActivity extends AppCompatActivity implements PostResponseList
 
     @Override
     public void onRequestStarted() {
-
+        _loginButton.setEnabled(false);
+        progressDialog = new ProgressDialog(LoginActivity.this,
+                R.style.AppTheme_Dark_Dialog);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Authenticating...");
+        progressDialog.show();
     }
 
     @Override
     public void onPOSTRequestCompleted(String result) {
-        Log.d(TAG, result);
         Toast.makeText(LoginActivity.this, result, Toast.LENGTH_LONG).show();
         _loginButton.setEnabled(true);
         if (progressDialog != null) {
@@ -152,6 +126,19 @@ public class LoginActivity extends AppCompatActivity implements PostResponseList
         _loginButton.setEnabled(true);
         if (progressDialog != null) {
             progressDialog.hide();
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_SIGNUP) {
+            if (resultCode == RESULT_OK) {
+
+                // TODO: Implement successful signup logic here
+                // By default we just finish the Activity and log them in automatically
+                this.finish();
+            }
         }
     }
 
